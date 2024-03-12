@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaussian Random Number Generator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      min-height: 100vh;  /* Ensures full viewport height */
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 600px;  /* Set a maximum width for responsiveness */
+      margin: 0 auto;  /* Center the container horizontally */
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .generator-section,
+    .plot-section {
+      margin-bottom: 20px;
+    }
+
+    .random-number {
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .button:hover {
+      background-color: #0056b3;
+    }
+
+    .slider-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .slider-container label {
+      flex: 1;  /* Allocate equal space to labels */
+      margin-right: 10px;
+    }
+
+    #mu-slider {
+      flex: 2;  /* Allocate more space to the slider */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Gaussian Random Number Generator</h1>
+    <div class="generator-section">
+      <form action="/generate" method="post">
+        <input type="submit" value="Generate Random Number" class="button">
+      </form>
+      {% if random_number %}
+        <div class="random-number">
+          Generated Number: {{ random_number }}
+        </div>
+      {% endif %}
+    </div>
+
+    <h1 class="plot-section">Gaussian Distribution Plot</h1>
+    <div class="plot-section">
+      <div class="slider-container">
+        <label for="mu">Mean (mu):</label>
+        <div id="mu-slider"></div>
+        <input type="number" id="mu" value="180" min="150" max="210" step="0.1">
+      </div>
+      <div class="slider-container">
+        <label for="sigma">Standard Deviation (sigma):</label>
+        <div id="sigma-slider"></div>  <input type="number" id="sigma" value="10" min="1" max="30" step="0.1">
+      </div>
+      <button id="generate-plot">Generate Plot</button>
+    </div>
+
+
+    <div>
+        <img src="static/gaussian_distribution.svg" alt="Gaussian Distribution Plot">
+
+        <!-- <object data="statgaussian_distribution.svg" type="image/svg+xml">
+            <img src="gaussian_distribution.jpg" />
+          </object> -->
+    </div>
+
+
+    <div id="plot-container"></div>
+
+    <script>
+             // Function to generate the plot using AJAX request
+             function generatePlot(mu, sigma) {
+                $.ajax({
+                    url: '/generate-plot',
+                    type: 'POST',
+                    data: {
+                        mu: mu,
+                        sigma: sigma
+                    },
+                    success: function(data) {
+                        $('#plot-container').html(data);  // Update the plot container with the generated SVG
+                    },
+                    dataType: 'text'  // Expecting SVG data as text
+                });
+            }
+
+         $(document).ready(function() {
+       
+            // Handle button click event to trigger plot generation
+            $('#generate-plot').click(function() {
+                var mu = parseFloat($('#mu').val());
+                var sigma = parseFloat($('#sigma').val());
+                generatePlot(mu, sigma);
+            });
+        });
+
+          // Configure noUiSlider for mu (mean)
+          var muSlider = noUiSlider.create($('#mu-slider')[0], {
+            start: [180],
+            connect: true,
+            step: 0.1,
+            range: {
+                min: 150,
+                max: 210
+            }
+        });
+
+          // Handle slider change event 
+          muSlider.on('slide', function (values, handle) {
+            var mu = parseFloat(values[0]);  // Get the new mu value from the slider
+            $('#mu').val(mu);  // Update the sigma input field (optional)
+            generatePlot(mu, parseFloat($('#sigma').val()));  // Trigger plot generation with updated mu
+        });
+
+        // Handle button click event (same as before)
+        $('#generate-plot').click(function() {
+            // ... (rest of the button click handler code)
+        });
+
+       
+    </script>
+
+
+</body>
+</html>
