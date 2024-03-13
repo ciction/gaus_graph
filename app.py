@@ -2,6 +2,12 @@ from flask import Flask, render_template, request
 import matplotlib.pyplot as plt
 import random
 import math
+import numpy as np
+from scipy.stats import norm
+import time
+
+import random
+from collections import Counter
 
 app = Flask(__name__, static_folder='templates/static')  # Specify the static folder location
 
@@ -40,10 +46,36 @@ def generate():
 
 def generate_Graph():
     # Generate 1000 random numbers following the Gaussian distribution
-    data = [generate_gaussian_random() for _ in range(1000)]
+    num_samples = 100000
+
+    start = time.time()
+    gaussian_array = [generate_gaussian_random() for _ in range(num_samples)]
+    
+    # Access the element at the random index
+    random_index = random.randint(0, num_samples - 1)  # Generate a random index within the array bounds
+    weighted_random_value = gaussian_array[random_index]
+    
+    end = time.time()
+
+    execution_time = end - start
+    print(f"Execution time: {execution_time:.6f} seconds")
+
+    # Define 
+    mu = 180
+    sigma = 30
+    # Generate weighted random values using inverse transform sampling
+    start = time.time()
+    weighted_random_values = norm.ppf(np.random.rand(num_samples), loc=mu, scale=sigma)
+    end = time.time()
+
+    
+    execution_time = end - start
+    print(f"Execution time: {execution_time:.6f} seconds")
+
+
 
     # Create a histogram to visualize the distribution of the data
-    plt.hist(data, bins=50, edgecolor='black')
+    plt.hist(gaussian_array, bins=50, edgecolor='black')
     plt.xlabel('Generated Values')
     plt.ylabel('Frequency')
     plt.title('Distribution of Gaussian Random Numbers (1000 Samples)')
@@ -87,5 +119,8 @@ def generate_plot():
 #     print(generate_gaussian_random())
 
 
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+    generate_Graph()
